@@ -1,0 +1,10 @@
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:613:16:USBD_HID_DataIn	1
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:630:17:USBD_HID_GetDeviceQualifierDesc	1
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:552:17:USBD_HID_GetFSCfgDesc	2
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:592:17:USBD_HID_GetOtherSpeedCfgDesc	1
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:572:17:USBD_HID_GetHSCfgDesc	2
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:357:16:USBD_HID_Setup	18
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:326:16:USBD_HID_DeInit	2
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:279:16:USBD_HID_Init	2
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:489:9:USBD_HID_SendReport	4
+D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/usbd_hid.c:522:10:USBD_HID_GetPollingInterval	1
