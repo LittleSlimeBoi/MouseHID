@@ -1,5 +1,5 @@
 Middlewares/FreeRTOS/timers.o: \
- D:/BK/20242/Nhúng/TouchGFX/MyApplication_1/Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+ C:/TouchGFXProjects/MouseHID/Middlewares/Third_Party/FreeRTOS/Source/timers.c \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../../Core/Inc/FreeRTOSConfig.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
