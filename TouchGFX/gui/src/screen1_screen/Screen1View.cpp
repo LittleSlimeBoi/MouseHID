@@ -67,6 +67,11 @@ void sendMouse(int8_t dx, int8_t dy)
     mousehid.mouse_x = dy * scale_y;
     mousehid.wheel = 0;
 
+//    mousehid.button = 0;
+//    mousehid.mouse_y = 10;
+//    mousehid.mouse_x = 10;
+//    mousehid.wheel = 0;
+
     USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
 
     mousehid.button = 0;
@@ -94,6 +99,7 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
     snprintf(msg, sizeof(msg), "%d, %d\r\n", dentaX, dentaY);
     uartPrint(msg);
 
+    //Gui thong tin
     sendMouse(dentaX, dentaY);
 }
 
@@ -114,10 +120,7 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
 
     	//Xu ly hien thi
     	isScaling = true;
-    	isTouching = true;
     	startTime = HAL_GetTick();
-    	scaleStep = 0;
-    	currentRadius = 20;
 
     	char msg[50];
     	snprintf(msg, sizeof(msg), "Pressed at: x=%d, y=%d\r\n", touch_x, touch_y);
@@ -135,8 +138,6 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
 
         isScaling = true;
         startTime = HAL_GetTick();
-        scaleStep = 0;
-        currentRadius = 20;
 
         char msg[50];
         snprintf(msg, sizeof(msg), "Released at: x=%d, y=%d\r\n", touch_x, touch_y);
@@ -150,24 +151,24 @@ void Screen1View::handleTickEvent()
 
 	//Xu ly hinh tron
     if (isScaling){
-    	scaleStep++;
-        if (scaleStep <= 63)
-        {
-            int newRadius = currentRadius - (scaleStep * 50 / 63);
-            myCircle.setRadius(newRadius);
-            myCircle.invalidate();
-        }
-        else
-        {
-            isScaling = false;
-            int lastTime = HAL_GetTick() - startTime;
-            myCircle.setVisible(false);
+    	int dentaTick = HAL_GetTick() - startTime;
 
-            char msg1[50];
-            snprintf(msg1, sizeof(msg1), "lastTime = %d\n", lastTime);
-            uartPrint(msg1);
+    	//Xu ly voi denta
+    	if(dentaTick <= 1000){
+    		int newRadius = currentRadius - currentRadius * dentaTick / 1000;
+    		myCircle.setRadius(newRadius);
+    		myCircle.invalidate();
+    	}
+    	else{
+    		isScaling = false;
+    		int lastTime = HAL_GetTick() - startTime;
+    		myCircle.setVisible(false);
+    		myCircle.invalidate();
 
-        }
+    		char msg1[50];
+    		snprintf(msg1, sizeof(msg1), "lastTime = %d\n", lastTime);
+    		uartPrint(msg1);
+    	}
     }
 }
 
