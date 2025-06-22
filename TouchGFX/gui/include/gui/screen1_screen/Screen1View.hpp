@@ -15,13 +15,18 @@ public:
     virtual void tearDownScreen();
     virtual void handleClickEvent(const ClickEvent& event);
     virtual void handleTickEvent();
+    virtual void handleDragEvent(const DragEvent& evt);
 protected:
     touchgfx::Circle myCircle;
     touchgfx::PainterRGB565 circlePainter;
 
+    int touch_x;
+    int touch_y;
+
     int currentRadius = 20;
     int scaleStep = 0;
     bool isScaling = false;
+    bool isTouching = false;
 
     static const uint32_t CANVAS_BUFFER_SIZE = 3600;
     uint8_t canvasBuffer[CANVAS_BUFFER_SIZE];

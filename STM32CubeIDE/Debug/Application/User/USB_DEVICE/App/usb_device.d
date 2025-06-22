@@ -1,6 +1,6 @@
 Application/User/USB_DEVICE/App/usb_device.o: \
- C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usb_device.c \
- C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usb_device.h \
+ C:/TouchGFXProjects/HID.12/MouseHID/USB_DEVICE/App/usb_device.c \
+ C:/TouchGFXProjects/HID.12/MouseHID/USB_DEVICE/App/usb_device.h \
  ../../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
  ../../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f429xx.h \
  ../../Drivers/CMSIS/Include/core_cm4.h \
@@ -48,10 +48,10 @@ Application/User/USB_DEVICE/App/usb_device.o: \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
- C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usbd_desc.h \
+ C:/TouchGFXProjects/HID.12/MouseHID/USB_DEVICE/App/usbd_desc.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc/usbd_hid.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
-C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usb_device.h:
+C:/TouchGFXProjects/HID.12/MouseHID/USB_DEVICE/App/usb_device.h:
 ../../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:
 ../../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f429xx.h:
 ../../Drivers/CMSIS/Include/core_cm4.h:
@@ -100,6 +100,6 @@ C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usb_device.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
-C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usbd_desc.h:
+C:/TouchGFXProjects/HID.12/MouseHID/USB_DEVICE/App/usbd_desc.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc/usbd_hid.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:

@@ -15,13 +15,13 @@ extern "C" {
 
 typedef struct {
 	uint8_t button;
-	uint16_t mouse_x;
-	uint16_t mouse_y;
+	int8_t mouse_x;
+	int8_t mouse_y;
 	int8_t wheel;
 } mouseHID;
 
-float scale_x = 1920.0f / 320.0f;
-float scale_y = 1080.0f / 240.0f;
+float scale_x = 1080.0f / 240.0f;
+float scale_y = 1920.0f / 320.0f;
 
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern UART_HandleTypeDef huart1;
@@ -37,12 +37,12 @@ void Screen1View::setupScreen()
 
     touchgfx::CanvasWidgetRenderer::setupBuffer(canvasBuffer, CANVAS_BUFFER_SIZE);
 
-    circlePainter.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
+    circlePainter.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
 
     // Setup animated circle
-    myCircle.setPosition(50, 50, 40, 40);
-    myCircle.setCenter(20, 20);
-    myCircle.setRadius(20);
+    myCircle.setPosition(0, 0, currentRadius * 2, currentRadius * 2);
+    myCircle.setCenter(currentRadius, currentRadius);
+    myCircle.setRadius(currentRadius);
     myCircle.setLineWidth(0);
     myCircle.setPainter(circlePainter);
     myCircle.setVisible(false);
@@ -60,70 +60,111 @@ void Screen1View::tearDownScreen()
     Screen1ViewBase::tearDownScreen();
 }
 
+void sendMouse(int8_t dx, int8_t dy)
+{
+    mousehid.button = 0;
+    mousehid.mouse_y = - dx * scale_x;
+    mousehid.mouse_x = dy * scale_y;
+    mousehid.wheel = 0;
+
+    USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+
+    mousehid.button = 0;
+    mousehid.mouse_x = 0;
+    mousehid.mouse_y = 0;
+    mousehid.wheel = 0;
+}
+
+void Screen1View::handleDragEvent(const DragEvent& evt)
+{
+	Screen1ViewBase::handleDragEvent(evt);
+
+	int dentaX = evt.getDeltaX();
+	int dentaY = evt.getDeltaY();
+
+	if(dentaX <= 1 && dentaX >= -1){
+		dentaX = 0;
+	}
+
+	if(dentaY <= 1 && dentaY >= -1){
+		dentaY = 0;
+	}
+
+    char msg[50];
+    snprintf(msg, sizeof(msg), "%d, %d\r\n", dentaX, dentaY);
+    uartPrint(msg);
+
+    sendMouse(dentaX, dentaY);
+}
+
 void Screen1View::handleClickEvent(const ClickEvent& event)
 {
     Screen1ViewBase::handleClickEvent(event);
+    currentRadius = 20;
+    touch_x = event.getX();
+    touch_y = event.getY();
 
-    if (event.getType() == ClickEvent::RELEASED)
+    //Xu ly nhan
+    if (event.getType() == ClickEvent::PRESSED)
     {
-        int x = event.getX();
-        int y = event.getY();
+    	myCircle.setPosition(touch_x - currentRadius, touch_y - currentRadius, currentRadius * 2, currentRadius * 2);
+    	myCircle.setCenter(currentRadius, currentRadius);
+    	myCircle.setRadius(currentRadius);
+    	myCircle.setVisible(true);
 
+    	//Xu ly hien thi
+    	isScaling = true;
+    	isTouching = true;
+    	startTime = HAL_GetTick();
+    	scaleStep = 0;
+    	currentRadius = 20;
 
-        //Gui thong tin ra man hinh
-        if (hUsbDeviceHS.dev_state == USBD_STATE_CONFIGURED) {
-        	mousehid.mouse_x = (uint16_t)(x * scale_x);
-        	mousehid.mouse_y = (uint16_t)(y * scale_y);
-        	mousehid.wheel = 0;
-        	mousehid.button = 0;
+    	char msg[50];
+    	snprintf(msg, sizeof(msg), "Pressed at: x=%d, y=%d\r\n", touch_x, touch_y);
+    	uartPrint(msg);
+    }
 
-        	USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t*)&mousehid, sizeof(mousehid));
-
-        	HAL_Delay(20);
-        	char *msg = "Mouse moved\r\n";
-        	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-
-        	mousehid.mouse_x = 0;
-        	mousehid.mouse_y = 0;
-        }
+    //Xu ly tha
+    else if(event.getType() == ClickEvent::RELEASED){
 
         // Đặt circle tại vị trí touch
-        myCircle.setPosition(x - 50, y - 50, 100, 100);
-        myCircle.setCenter(50, 50);
-        myCircle.setRadius(50);
+        myCircle.setPosition(touch_x - currentRadius, touch_y - currentRadius, currentRadius * 2, currentRadius * 2);
+        myCircle.setCenter(currentRadius, currentRadius);
+        myCircle.setRadius(currentRadius);
         myCircle.setVisible(true);
 
-        // Bắt đầu hiệu ứng thu nhỏ
         isScaling = true;
         startTime = HAL_GetTick();
         scaleStep = 0;
-        currentRadius = 50; // Bắt đầu từ 50 pixels
+        currentRadius = 20;
 
         char msg[50];
-        snprintf(msg, sizeof(msg), "Touch at: x=%d, y=%d\r\n", x, y);
+        snprintf(msg, sizeof(msg), "Released at: x=%d, y=%d\r\n", touch_x, touch_y);
         uartPrint(msg);
     }
+
 }
 
 void Screen1View::handleTickEvent()
 {
-    if (isScaling){
 
+	//Xu ly hinh tron
+    if (isScaling){
     	scaleStep++;
         if (scaleStep <= 63)
         {
-            currentRadius = 50 - (scaleStep * 50 / 63);
-            myCircle.setRadius(currentRadius);
+            int newRadius = currentRadius - (scaleStep * 50 / 63);
+            myCircle.setRadius(newRadius);
             myCircle.invalidate();
         }
         else
         {
             isScaling = false;
             int lastTime = HAL_GetTick() - startTime;
-            myCircle.setVisible(false); // Ẩn circle
+            myCircle.setVisible(false);
 
             char msg1[50];
-            snprintf(msg1, sizeof(msg1), "lastTime = %d", lastTime);
+            snprintf(msg1, sizeof(msg1), "lastTime = %d\n", lastTime);
             uartPrint(msg1);
 
         }

@@ -1,5 +1,5 @@
 Application/User/generated/GeneratedFont.o: \
- C:/TouchGFXProjects/MouseHID/TouchGFX/generated/fonts/src/GeneratedFont.cpp \
+ C:/TouchGFXProjects/HID.12/MouseHID/TouchGFX/generated/fonts/src/GeneratedFont.cpp \
  ../../TouchGFX/generated/fonts/include/fonts/GeneratedFont.hpp \
  ../../Middlewares/ST/touchgfx/framework/include/touchgfx/ConstFont.hpp \
  ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Font.hpp \

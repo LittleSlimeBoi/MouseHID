@@ -16,10 +16,10 @@
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Screen.hpp:144:18:virtual void touchgfx::Screen::handleTickEvent()	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Screen.hpp:154:18:virtual void touchgfx::Screen::handleKeyEvent(uint8_t)	1
 ../../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:36:7:touchgfx::View<Screen1Presenter>::~View()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:14:1:Screen1ViewBase::~Screen1ViewBase()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:19:6:virtual void Screen1ViewBase::setupScreen()	1
+C:/TouchGFXProjects/HID.12/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:14:1:Screen1ViewBase::~Screen1ViewBase()	1
+C:/TouchGFXProjects/HID.12/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:19:6:virtual void Screen1ViewBase::setupScreen()	1
 ../../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:36:7:virtual touchgfx::View<Screen1Presenter>::~View()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:14:1:virtual Screen1ViewBase::~Screen1ViewBase()	1
+C:/TouchGFXProjects/HID.12/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:14:1:virtual Screen1ViewBase::~Screen1ViewBase()	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:121:18:virtual void touchgfx::Drawable::invalidateContent() const	2
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Widget.hpp:45:18:virtual void touchgfx::Widget::getLastChild(int16_t, int16_t, touchgfx::Drawable**)	3
-C:/TouchGFXProjects/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:7:1:Screen1ViewBase::Screen1ViewBase()	1
+C:/TouchGFXProjects/HID.12/MouseHID/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:7:1:Screen1ViewBase::Screen1ViewBase()	1

@@ -33,8 +33,8 @@
 /* USER CODE BEGIN PTD */
 typedef struct {
 	uint8_t button;
-	uint16_t  mouse_x;
-	uint16_t  mouse_y;
+	int8_t  mouse_x;
+	int8_t  mouse_y;
 	int8_t wheel;
 } mouseHID;
 mouseHID mousehid = {0,0,0,0};
@@ -113,7 +113,7 @@ const osMessageQueueAttr_t myQueue01_attributes = {
   .name = "myQueue01"
 };
 /* USER CODE BEGIN PV */
-uint8_t isRevD = 0; /* Applicable only for STM32F429I DISCOVERY REVD and above */
+uint8_t isRevD = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
