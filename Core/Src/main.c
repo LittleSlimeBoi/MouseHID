@@ -100,13 +100,6 @@ const osThreadAttr_t GUI_Task_attributes = {
   .stack_size = 8192 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for myTask03 */
-osThreadId_t myTask03Handle;
-const osThreadAttr_t myTask03_attributes = {
-  .name = "myTask03",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for myQueue01 */
 osMessageQueueId_t myQueue01Handle;
 const osMessageQueueAttr_t myQueue01_attributes = {
@@ -128,7 +121,6 @@ static void MX_DMA2D_Init(void);
 static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void *argument);
 extern void TouchGFX_Task(void *argument);
-void StartTask03(void *argument);
 
 /* USER CODE BEGIN PFP */
 static void BSP_SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
@@ -241,9 +233,6 @@ int main(void)
 
   /* creation of GUI_Task */
   GUI_TaskHandle = osThreadNew(TouchGFX_Task, NULL, &GUI_Task_attributes);
-
-  /* creation of myTask03 */
-  myTask03Handle = osThreadNew(StartTask03, NULL, &myTask03_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1035,24 +1024,6 @@ void StartDefaultTask(void *argument)
     osDelay(100);
   }
   /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_StartTask03 */
-/**
-* @brief Function implementing the myTask03 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask03 */
-void StartTask03(void *argument)
-{
-  /* USER CODE BEGIN StartTask03 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartTask03 */
 }
 
 /**

@@ -1,5 +1,5 @@
 Middlewares/USB_Device_Library/usbd_core.o: \
- C:/TouchGFXProjects/HID.12/MouseHID/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
+ C:/TouchGFXProjects/MouseHID/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../../USB_DEVICE/Target/usbd_conf.h ../../Core/Inc/main.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \

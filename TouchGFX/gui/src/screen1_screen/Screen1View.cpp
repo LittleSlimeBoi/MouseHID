@@ -1,6 +1,5 @@
 #include <gui/screen1_screen/Screen1View.hpp>
 #include "cmsis_os.h"
-#include <gui/screen1_screen/Screen1View.hpp>
 #include <cstdio>
 #include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/Color.hpp>
@@ -9,9 +8,6 @@
 #include "usbd_hid.h"
 
 uint32_t startTime;
-extern "C" {
-#include "main.h"
-}
 
 typedef struct {
 	uint8_t button;
@@ -63,13 +59,13 @@ void Screen1View::tearDownScreen()
 void sendMouse(int8_t dx, int8_t dy)
 {
     mousehid.button = 0;
-    mousehid.mouse_y = - dx * scale_x;
+    mousehid.mouse_y = -dx * scale_x;
     mousehid.mouse_x = dy * scale_y;
     mousehid.wheel = 0;
 
 //    mousehid.button = 0;
-//    mousehid.mouse_y = 10;
-//    mousehid.mouse_x = 10;
+//    mousehid.mouse_y = -dx;
+//    mousehid.mouse_x = dy;
 //    mousehid.wheel = 0;
 
     USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
