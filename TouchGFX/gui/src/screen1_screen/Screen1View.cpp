@@ -88,8 +88,7 @@ void Screen1View::applySmoothing(int& deltaX, int& deltaY)
 }
 
 void Screen1View::resetTouchState()
-{
-    isPotentialClick = false;
+{    isPotentialClick = false;
     isDragging = false;
     velocity_x = 0.0f;
     velocity_y = 0.0f;
@@ -162,7 +161,6 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	if(!isDragging) {
 		return;
 	}
-
 	applySmoothing(deltaX, deltaY);
 	
 	updateVelocity(deltaX, deltaY, timeDelta);
@@ -170,10 +168,13 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	if(abs(deltaX) <= 0 && abs(deltaY) <= 0){
 		return;
 	}
-	if(timeDelta < 50) {
-		deltaX = (int)(deltaX * 1.1f);
-		deltaY = (int)(deltaY * 1.1f);
+	float velocity_factor = 1.0f;
+	if(abs(velocity_x) > 50.0f || abs(velocity_y) > 50.0f) {
+		velocity_factor = 1.5f;
 	}
+	
+	deltaX = (int)(deltaX * velocity_factor);
+	deltaY = (int)(deltaY * velocity_factor);
 
 	char msg[50];
 	snprintf(msg, sizeof(msg), "Drag: %d, %d\r\n", deltaX, deltaY);
@@ -227,7 +228,8 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
             
             enqueueMouseEvent(0, 0, 1);
             enqueueMouseEvent(0, 0, 2);
-        }        else if(isDragging)
+        }        
+        else if(isDragging)
         {
             char msg[50];
             snprintf(msg, sizeof(msg), "Drag ended: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);

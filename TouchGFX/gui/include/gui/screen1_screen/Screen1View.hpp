@@ -29,7 +29,7 @@ protected:
 
     static const int SMOOTHING_BUFFER_SIZE = 3;
     int smoothing_x[SMOOTHING_BUFFER_SIZE];
-    int smoothing_y[SMOOTHING_BUFFER_SIZE];
+    int smoothing_y[SMOOTHING_BUFFER_SIZE];    
     int smoothing_index = 0;
     uint32_t lastDragTime = 0;
     float velocity_x = 0.0f;
