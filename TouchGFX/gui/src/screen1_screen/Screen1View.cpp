@@ -15,6 +15,11 @@ typedef struct {
 	int8_t mouse_y;
 	int8_t wheel;
 } mouseHID;
+typedef struct {
+    int8_t dx;
+    int8_t dy;
+} mouseDeviation;
+mouseDeviation md = {0, 0};
 
 float scale_x = 1080.0f / 240.0f;
 float scale_y = 1920.0f / 320.0f;
@@ -22,6 +27,7 @@ float scale_y = 1920.0f / 320.0f;
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern UART_HandleTypeDef huart1;
 extern mouseHID mousehid;
+extern osMessageQueueId_t mouseEventQueueHandle;
 
 Screen1View::Screen1View()
 {
@@ -96,7 +102,9 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
     uartPrint(msg);
 
     //Gui thong tin
-    sendMouse(dentaX, dentaY);
+    //sendMouse(dentaX, dentaY);
+    md = {dentaX, dentaY};
+    osMessageQueuePut(mouseEventQueueHandle, &md, 0, 0);
 }
 
 void Screen1View::handleClickEvent(const ClickEvent& event)

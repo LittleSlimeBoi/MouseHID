@@ -39,7 +39,16 @@ typedef struct {
 } mouseHID;
 mouseHID mousehid = {0,0,0,0};
 
+typedef struct {
+    int8_t dx;
+    int8_t dy;
+} mouseDeviation;
+
 extern USBD_HandleTypeDef hUsbDeviceHS;
+extern volatile bool hidReady;
+
+float scale_x = 1080.0f / 240.0f;
+float scale_y = 1920.0f / 320.0f;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -100,10 +109,10 @@ const osThreadAttr_t GUI_Task_attributes = {
   .stack_size = 8192 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for myQueue01 */
-osMessageQueueId_t myQueue01Handle;
-const osMessageQueueAttr_t myQueue01_attributes = {
-  .name = "myQueue01"
+/* Definitions for mouseEventQueue */
+osMessageQueueId_t mouseDragQueueHandle;
+const osMessageQueueAttr_t mouseDragQueue_attributes = {
+  .name = "mouseDragQueue"
 };
 /* USER CODE BEGIN PV */
 uint8_t isRevD = 0;
@@ -198,6 +207,7 @@ int main(void)
   MX_DMA2D_Init();
   MX_USART1_UART_Init();
   MX_TouchGFX_Init();
+  MX_USB_DEVICE_Init();
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
@@ -220,8 +230,8 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* creation of myQueue01 */
-  myQueue01Handle = osMessageQueueNew (16, sizeof(uint16_t), &myQueue01_attributes);
+  /* creation of mouseEventQueue */
+  mouseDragQueueHandle = osMessageQueueNew (16, sizeof(mouseDeviation), &mouseDragQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -1015,13 +1025,31 @@ void LCD_Delay(uint32_t Delay)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
+  mouseDeviation md;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(100);
+	if (osMessageQueueGet(mouseEventQueue, &evt, NULL, osWaitForever) == osOK){
+	  if (!hidReady){
+		osDelay(1);
+		continue;
+	  }
+
+	  mousehid.button = 0;
+	  mousehid.mouse_y = -evt.dx * scale_x;
+	  mousehid.mouse_x = evt.dy * scale_y;
+	  mousehid.wheel = 0;
+
+	  hidReady = false;
+	  USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+
+	  mousehid.button = 0;
+	  mousehid.mouse_y = 0;
+	  mousehid.mouse_x = 0;
+	  mousehid.wheel = 0;
+	}
+    osDelay(5);
   }
   /* USER CODE END 5 */
 }
