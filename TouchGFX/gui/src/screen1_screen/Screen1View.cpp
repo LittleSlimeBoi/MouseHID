@@ -23,8 +23,6 @@ Screen1View::Screen1View()
     }
     smoothing_index = 0;
     lastDragTime = 0;
-    velocity_x = 0.0f;
-    velocity_y = 0.0f;
     
     isPotentialClick = false;
     isDragging = false;
@@ -90,8 +88,6 @@ void Screen1View::applySmoothing(int& deltaX, int& deltaY)
 void Screen1View::resetTouchState()
 {    isPotentialClick = false;
     isDragging = false;
-    velocity_x = 0.0f;
-    velocity_y = 0.0f;
     
     for(int i = 0; i < SMOOTHING_BUFFER_SIZE; i++) {
         smoothing_x[i] = 0;
@@ -103,35 +99,6 @@ void Screen1View::resetTouchState()
     pressStartTime = 0;
 }
 
-void Screen1View::updateVelocity(int deltaX, int deltaY, uint32_t timeDelta)
-{
-    if(timeDelta > 0) {
-        float current_vel_x = (float)deltaX / timeDelta * 1000.0f;
-        float current_vel_y = (float)deltaY / timeDelta * 1000.0f;
-        
-        if((velocity_x > 0 && current_vel_x > 0) || (velocity_x < 0 && current_vel_x < 0)) {
-            velocity_x = velocity_x * DAMPING_FACTOR + current_vel_x * (1 - DAMPING_FACTOR);
-            if(abs(velocity_x) > abs(current_vel_x)) {
-                velocity_x *= ACCELERATION_FACTOR;
-            }
-        } else {
-            velocity_x = current_vel_x;
-        }
-        
-        if((velocity_y > 0 && current_vel_y > 0) || (velocity_y < 0 && current_vel_y < 0)) {
-            velocity_y = velocity_y * DAMPING_FACTOR + current_vel_y * (1 - DAMPING_FACTOR);
-            if(abs(velocity_y) > abs(current_vel_y)) {
-                velocity_y *= ACCELERATION_FACTOR;
-            }
-        } else {
-            velocity_y = current_vel_y;
-        }
-        
-        if(abs(velocity_x) < MIN_VELOCITY_THRESHOLD) velocity_x = 0;
-        if(abs(velocity_y) < MIN_VELOCITY_THRESHOLD) velocity_y = 0;
-    }
-}
-
 void Screen1View::handleDragEvent(const DragEvent& evt)
 {
 	Screen1ViewBase::handleDragEvent(evt);
@@ -141,7 +108,8 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	
 	uint32_t currentTime = HAL_GetTick();
 	uint32_t timeDelta = currentTime - lastDragTime;
-	lastDragTime = currentTime;	if(isPotentialClick && !isDragging) {
+	lastDragTime = currentTime;
+	if(isPotentialClick && !isDragging) {
 		uint32_t timeSincePress = currentTime - pressStartTime;
 		int totalMovement = abs(evt.getNewX() - press_start_x) + abs(evt.getNewY() - press_start_y);
 		
@@ -162,8 +130,6 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 		return;
 	}
 	applySmoothing(deltaX, deltaY);
-	
-	updateVelocity(deltaX, deltaY, timeDelta);
 
 	if(abs(deltaX) <= 0 && abs(deltaY) <= 0){
 		return;
@@ -234,9 +200,7 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
             char msg[50];
             snprintf(msg, sizeof(msg), "Drag ended: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
             uartPrint(msg);
-        }
-        else
-        {
+        } else {
             char msg[50];
             snprintf(msg, sizeof(msg), "Gesture cancelled: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
             uartPrint(msg);

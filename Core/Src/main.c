@@ -213,6 +213,7 @@ int main(void)
   MX_DMA2D_Init();
   MX_USART1_UART_Init();
   MX_TouchGFX_Init();
+  MX_USB_DEVICE_Init();
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
@@ -1113,8 +1114,6 @@ void LCD_Delay(uint32_t Delay)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
