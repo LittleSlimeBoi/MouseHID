@@ -15,14 +15,9 @@ typedef struct {
 	int8_t mouse_y;
 	int8_t wheel;
 } mouseHID;
-typedef struct {
-    int8_t dx;
-    int8_t dy;
-} mouseDeviation;
-mouseDeviation md = {0, 0};
 
-float scale_x = 1080.0f / 240.0f;
-float scale_y = 1920.0f / 320.0f;
+//float scale_x = 1080.0f / 240.0f;
+//float scale_y = 1920.0f / 320.0f;
 
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern UART_HandleTypeDef huart1;
@@ -61,7 +56,7 @@ void Screen1View::tearDownScreen()
 {
     Screen1ViewBase::tearDownScreen();
 }
-
+/*
 void sendMouse(int8_t dx, int8_t dy)
 {
     mousehid.button = 0;
@@ -81,7 +76,7 @@ void sendMouse(int8_t dx, int8_t dy)
     mousehid.mouse_y = 0;
     mousehid.wheel = 0;
 }
-
+*/
 void Screen1View::handleDragEvent(const DragEvent& evt)
 {
 	Screen1ViewBase::handleDragEvent(evt);
@@ -101,10 +96,11 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
     snprintf(msg, sizeof(msg), "%d, %d\r\n", dentaX, dentaY);
     uartPrint(msg);
 
+    mouseHID mouseEvent = {0, dentaX, dentaY, 0};
+
     //Gui thong tin
     //sendMouse(dentaX, dentaY);
-    md = {dentaX, dentaY};
-    osMessageQueuePut(mouseEventQueueHandle, &md, 0, 0);
+    osMessageQueuePut(mouseEventQueueHandle, &mouseEvent, 0, 0);
 }
 
 void Screen1View::handleClickEvent(const ClickEvent& event)
@@ -162,6 +158,9 @@ void Screen1View::handleTickEvent()
     		int newRadius = currentRadius - currentRadius * dentaTick / 1000;
     		myCircle.setRadius(newRadius);
     		myCircle.invalidate();
+
+    		mouseHID clickDown = {1, mousehid.mouse_x, mousehid.mouse_y, mousehid.wheel};
+    		mouseHID clickUp = {0, mousehid.mouse_x, mousehid.mouse_y, mousehid.wheel};
     	}
     	else{
     		isScaling = false;

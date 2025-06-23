@@ -46,7 +46,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_hid.h"
 #include "usbd_ctlreq.h"
-
+#include <stdbool.h>
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
@@ -610,13 +610,14 @@ static uint8_t *USBD_HID_GetOtherSpeedCfgDesc(uint16_t *length)
   * @param  epnum: endpoint index
   * @retval status
   */
+volatile bool hidReady = true;
 static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
   UNUSED(epnum);
   /* Ensure that the FIFO is empty before a new transfer, this condition could
   be caused by  a new transfer before the end of the previous transfer */
   ((USBD_HID_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId])->state = USBD_HID_IDLE;
-
+  hidReady = true;
   return (uint8_t)USBD_OK;
 }
 

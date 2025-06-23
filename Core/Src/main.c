@@ -22,6 +22,7 @@
 #include "cmsis_os.h"
 #include "app_touchgfx.h"
 #include "usb_device.h"
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -38,11 +39,6 @@ typedef struct {
 	int8_t wheel;
 } mouseHID;
 mouseHID mousehid = {0,0,0,0};
-
-typedef struct {
-    int8_t dx;
-    int8_t dy;
-} mouseDeviation;
 
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern volatile bool hidReady;
@@ -110,9 +106,9 @@ const osThreadAttr_t GUI_Task_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for mouseEventQueue */
-osMessageQueueId_t mouseDragQueueHandle;
-const osMessageQueueAttr_t mouseDragQueue_attributes = {
-  .name = "mouseDragQueue"
+osMessageQueueId_t mouseEventQueueHandle;
+const osMessageQueueAttr_t mouseEventQueue_attributes = {
+  .name = "mouseEventQueue"
 };
 /* USER CODE BEGIN PV */
 uint8_t isRevD = 0;
@@ -231,7 +227,7 @@ int main(void)
 
   /* Create the queue(s) */
   /* creation of mouseEventQueue */
-  mouseDragQueueHandle = osMessageQueueNew (16, sizeof(mouseDeviation), &mouseDragQueue_attributes);
+  mouseEventQueueHandle = osMessageQueueNew (16, sizeof(mouseHID), &mouseEventQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -1026,25 +1022,28 @@ void LCD_Delay(uint32_t Delay)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-  mouseDeviation md;
+  mouseHID evt;
   /* Infinite loop */
   for(;;)
   {
-	if (osMessageQueueGet(mouseEventQueue, &evt, NULL, osWaitForever) == osOK){
+	if (osMessageQueueGet(mouseEventQueueHandle, &evt, NULL, osWaitForever) == osOK){
 	  if (!hidReady){
 		osDelay(1);
 		continue;
 	  }
 
-	  mousehid.button = 0;
-	  mousehid.mouse_y = -evt.dx * scale_x;
-	  mousehid.mouse_x = evt.dy * scale_y;
+	  mousehid.button = evt.button;
+	  mousehid.mouse_y = -evt.mouse_x * scale_x;
+	  mousehid.mouse_x = evt.mouse_y * scale_y;
 	  mousehid.wheel = 0;
 
 	  hidReady = false;
 	  USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
 
-	  mousehid.button = 0;
+	  if(mousehid.button != 0){
+		mousehid.button = 0;
+		USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+	  }
 	  mousehid.mouse_y = 0;
 	  mousehid.mouse_x = 0;
 	  mousehid.wheel = 0;
