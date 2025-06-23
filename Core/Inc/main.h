@@ -32,12 +32,21 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cmsis_os.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef struct {
+    int8_t deltaX;
+    int8_t deltaY;
+    uint32_t timestamp;
+    uint8_t eventType; // 0: drag, 1: nhan, 2: tha
+} MouseEvent;
 
+extern osMessageQueueId_t mouseEventQueueHandle;
+extern osThreadId_t mouseTaskHandle;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -54,7 +63,8 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void mouseProcessingTask(void *pvParameters);
+bool enqueueMouseEvent(int8_t deltaX, int8_t deltaY, uint8_t eventType);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

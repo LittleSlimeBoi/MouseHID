@@ -117,13 +117,7 @@ Application/User/gui/Screen1View.o: \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
- ../../USB_DEVICE/Target/usbd_conf.h ../../Core/Inc/main.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc/usbd_hid.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
- ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
+ ../../USB_DEVICE/Target/usbd_conf.h ../../Core/Inc/main.h
 ../../TouchGFX/gui/include/gui/screen1_screen/Screen1View.hpp:
 ../../TouchGFX/generated/gui_generated/include/gui_generated/screen1_screen/Screen1ViewBase.hpp:
 ../../TouchGFX/gui/include/gui/common/FrontendApplication.hpp:
@@ -243,9 +237,3 @@ Application/User/gui/Screen1View.o: \
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:
 ../../USB_DEVICE/Target/usbd_conf.h:
 ../../Core/Inc/main.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc/usbd_hid.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
-../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:

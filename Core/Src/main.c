@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "usbd_hid.h"
 #include "Components/ili9341/ili9341.h"
+#include <math.h>
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,6 +107,18 @@ osMessageQueueId_t myQueue01Handle;
 const osMessageQueueAttr_t myQueue01_attributes = {
   .name = "myQueue01"
 };
+/* Definitions for mouseEventQueue */
+osMessageQueueId_t mouseEventQueueHandle;
+const osMessageQueueAttr_t mouseEventQueue_attributes = {
+  .name = "mouseEventQueue"
+};
+/* Definitions for mouseTask */
+osThreadId_t mouseTaskHandle;
+const osThreadAttr_t mouseTask_attributes = {
+  .name = "mouseTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 uint8_t isRevD = 0;
 /* USER CODE END PV */
@@ -125,7 +139,8 @@ extern void TouchGFX_Task(void *argument);
 /* USER CODE BEGIN PFP */
 static void BSP_SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
 
-
+void mouseProcessingTask(void *pvParameters);
+bool enqueueMouseEvent(int8_t deltaX, int8_t deltaY, uint8_t eventType);
 
 static uint8_t            I2C3_ReadData(uint8_t Addr, uint8_t Reg);
 static void               I2C3_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -218,21 +233,25 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
-
   /* Create the queue(s) */
   /* creation of myQueue01 */
   myQueue01Handle = osMessageQueueNew (16, sizeof(uint16_t), &myQueue01_attributes);
 
+  /* creation of mouseEventQueue */
+  mouseEventQueueHandle = osMessageQueueNew (32, sizeof(MouseEvent), &mouseEventQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
-
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of GUI_Task */
   GUI_TaskHandle = osThreadNew(TouchGFX_Task, NULL, &GUI_Task_attributes);
+
+  /* creation of mouseTask */
+  mouseTaskHandle = osThreadNew(mouseProcessingTask, NULL, &mouseTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -682,6 +701,85 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 /**
+  * @brief  Mouse processing task
+  * @param  pvParameters: Not used
+  * @retval None
+  */
+void mouseProcessingTask(void *pvParameters)
+{
+    MouseEvent event;
+    static float accumulated_x = 0.0f;
+    static float accumulated_y = 0.0f;
+    float scale_x = 2.0f;
+    float scale_y = 2.0f;
+    
+    while(1) {
+        if(osMessageQueueGet(mouseEventQueueHandle, &event, NULL, osWaitForever) == osOK) {
+            if(event.eventType == 0) {
+                accumulated_x += -event.deltaX * scale_x;
+                accumulated_y += event.deltaY * scale_y;
+                
+                int8_t send_x = (int8_t)round(accumulated_x);
+                int8_t send_y = (int8_t)round(accumulated_y);
+                
+                accumulated_x -= send_x;
+                accumulated_y -= send_y;
+                
+                if(send_x != 0 || send_y != 0) {
+                    mousehid.button = 0;
+                    mousehid.mouse_x = send_y;
+                    mousehid.mouse_y = send_x;
+                    mousehid.wheel = 0;
+
+                    USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+                    
+                    mousehid.button = 0;
+                    mousehid.mouse_x = 0;
+                    mousehid.mouse_y = 0;
+                    mousehid.wheel = 0;
+                }
+            }
+            else if(event.eventType == 1) {
+                mousehid.button = 1;
+                mousehid.mouse_x = 0;
+                mousehid.mouse_y = 0;
+                mousehid.wheel = 0;
+                USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+                
+                osDelay(50);
+            }
+            else if(event.eventType == 2) {
+                mousehid.button = 0;
+                mousehid.mouse_x = 0;
+                mousehid.mouse_y = 0;
+                mousehid.wheel = 0;
+                USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
+            }
+        }
+    }
+}
+
+/**
+  * @brief  Enqueue mouse event
+  * @param  deltaX: X axis delta
+  * @param  deltaY: Y axis delta
+  * @param  eventType: Event type (0: drag, 1: press, 2: release)
+  * @retval bool: true if successful, false otherwise
+  */
+bool enqueueMouseEvent(int8_t deltaX, int8_t deltaY, uint8_t eventType)
+{
+    if(mouseEventQueueHandle == NULL) return false;
+    
+    MouseEvent event;
+    event.deltaX = deltaX;
+    event.deltaY = deltaY;
+    event.timestamp = HAL_GetTick();
+    event.eventType = eventType;
+    
+    return osMessageQueuePut(mouseEventQueueHandle, &event, 0, 0) == osOK;
+}
+
+/**
   * @brief  Perform the SDRAM external memory initialization sequence
   * @param  hsdram: SDRAM handle
   * @param  Command: Pointer to SDRAM command structure
@@ -1053,26 +1151,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   * @retval None
   */
 void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
+{  /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 
-  /* USER CODE END Error_Handler_Debug */
+/* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */

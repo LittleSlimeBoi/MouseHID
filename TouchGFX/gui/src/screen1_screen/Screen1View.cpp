@@ -1,30 +1,36 @@
 #include <gui/screen1_screen/Screen1View.hpp>
 #include "cmsis_os.h"
 #include <cstdio>
+#include <cmath>
 #include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/Color.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 #include "usb_device.h"
-#include "usbd_hid.h"
+#include "main.h"
 
 uint32_t startTime;
 
-typedef struct {
-	uint8_t button;
-	int8_t mouse_x;
-	int8_t mouse_y;
-	int8_t wheel;
-} mouseHID;
-
-float scale_x = 1080.0f / 240.0f;
-float scale_y = 1920.0f / 320.0f;
-
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern UART_HandleTypeDef huart1;
-extern mouseHID mousehid;
+extern osMessageQueueId_t mouseEventQueueHandle;
+extern osThreadId_t mouseTaskHandle;
 
 Screen1View::Screen1View()
 {
+    for(int i = 0; i < SMOOTHING_BUFFER_SIZE; i++) {
+        smoothing_x[i] = 0;
+        smoothing_y[i] = 0;
+    }
+    smoothing_index = 0;
+    lastDragTime = 0;
+    velocity_x = 0.0f;
+    velocity_y = 0.0f;
+    
+    isPotentialClick = false;
+    isDragging = false;
+    pressStartTime = 0;
+    press_start_x = 0;
+    press_start_y = 0;
 }
 
 void Screen1View::setupScreen()
@@ -35,7 +41,6 @@ void Screen1View::setupScreen()
 
     circlePainter.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
 
-    // Setup animated circle
     myCircle.setPosition(0, 0, currentRadius * 2, currentRadius * 2);
     myCircle.setCenter(currentRadius, currentRadius);
     myCircle.setRadius(currentRadius);
@@ -48,55 +53,134 @@ void Screen1View::setupScreen()
 
 void uartPrint(const char* msg)
 {
-    HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 10);
 }
 
 void Screen1View::tearDownScreen()
 {
     Screen1ViewBase::tearDownScreen();
+    
+    if(mouseTaskHandle != NULL) {
+        osThreadTerminate(mouseTaskHandle);
+        mouseTaskHandle = NULL;
+    }
+    
+    if(mouseEventQueueHandle != NULL) {
+        osMessageQueueDelete(mouseEventQueueHandle);
+        mouseEventQueueHandle = NULL;
+    }
 }
 
-void sendMouse(int8_t dx, int8_t dy)
+void Screen1View::applySmoothing(int& deltaX, int& deltaY)
 {
-    mousehid.button = 0;
-    mousehid.mouse_y = -dx * scale_x;
-    mousehid.mouse_x = dy * scale_y;
-    mousehid.wheel = 0;
+    smoothing_x[smoothing_index] = deltaX;
+    smoothing_y[smoothing_index] = deltaY;
+    smoothing_index = (smoothing_index + 1) % SMOOTHING_BUFFER_SIZE;
+    
+    int sum_x = 0, sum_y = 0;
+    for(int i = 0; i < SMOOTHING_BUFFER_SIZE; i++) {
+        sum_x += smoothing_x[i];
+        sum_y += smoothing_y[i];
+    }
+    
+    deltaX = sum_x / SMOOTHING_BUFFER_SIZE;
+    deltaY = sum_y / SMOOTHING_BUFFER_SIZE;
+}
 
-//    mousehid.button = 0;
-//    mousehid.mouse_y = -dx;
-//    mousehid.mouse_x = dy;
-//    mousehid.wheel = 0;
+void Screen1View::resetTouchState()
+{
+    isPotentialClick = false;
+    isDragging = false;
+    velocity_x = 0.0f;
+    velocity_y = 0.0f;
+    
+    for(int i = 0; i < SMOOTHING_BUFFER_SIZE; i++) {
+        smoothing_x[i] = 0;
+        smoothing_y[i] = 0;
+    }
+    smoothing_index = 0;
+    
+    lastDragTime = 0;
+    pressStartTime = 0;
+}
 
-    USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mousehid, sizeof(mousehid));
-
-    mousehid.button = 0;
-    mousehid.mouse_x = 0;
-    mousehid.mouse_y = 0;
-    mousehid.wheel = 0;
+void Screen1View::updateVelocity(int deltaX, int deltaY, uint32_t timeDelta)
+{
+    if(timeDelta > 0) {
+        float current_vel_x = (float)deltaX / timeDelta * 1000.0f;
+        float current_vel_y = (float)deltaY / timeDelta * 1000.0f;
+        
+        if((velocity_x > 0 && current_vel_x > 0) || (velocity_x < 0 && current_vel_x < 0)) {
+            velocity_x = velocity_x * DAMPING_FACTOR + current_vel_x * (1 - DAMPING_FACTOR);
+            if(abs(velocity_x) > abs(current_vel_x)) {
+                velocity_x *= ACCELERATION_FACTOR;
+            }
+        } else {
+            velocity_x = current_vel_x;
+        }
+        
+        if((velocity_y > 0 && current_vel_y > 0) || (velocity_y < 0 && current_vel_y < 0)) {
+            velocity_y = velocity_y * DAMPING_FACTOR + current_vel_y * (1 - DAMPING_FACTOR);
+            if(abs(velocity_y) > abs(current_vel_y)) {
+                velocity_y *= ACCELERATION_FACTOR;
+            }
+        } else {
+            velocity_y = current_vel_y;
+        }
+        
+        if(abs(velocity_x) < MIN_VELOCITY_THRESHOLD) velocity_x = 0;
+        if(abs(velocity_y) < MIN_VELOCITY_THRESHOLD) velocity_y = 0;
+    }
 }
 
 void Screen1View::handleDragEvent(const DragEvent& evt)
 {
 	Screen1ViewBase::handleDragEvent(evt);
 
-	int dentaX = evt.getDeltaX();
-	int dentaY = evt.getDeltaY();
-
-	if(dentaX <= 1 && dentaX >= -1){
-		dentaX = 0;
+	int deltaX = evt.getDeltaX();
+	int deltaY = evt.getDeltaY();
+	
+	uint32_t currentTime = HAL_GetTick();
+	uint32_t timeDelta = currentTime - lastDragTime;
+	lastDragTime = currentTime;	if(isPotentialClick && !isDragging) {
+		uint32_t timeSincePress = currentTime - pressStartTime;
+		int totalMovement = abs(evt.getNewX() - press_start_x) + abs(evt.getNewY() - press_start_y);
+		
+		if(timeSincePress >= DRAG_MIN_TIME && totalMovement >= DRAG_THRESHOLD) {
+			isDragging = true;
+			isPotentialClick = false;
+			
+			char msg[50];
+			snprintf(msg, sizeof(msg), "Drag started: time=%lums, move=%dpx\r\n", timeSincePress, totalMovement);
+			uartPrint(msg);
+		}
+		else {
+			return;
+		}
+	}
+	
+	if(!isDragging) {
+		return;
 	}
 
-	if(dentaY <= 1 && dentaY >= -1){
-		dentaY = 0;
+	applySmoothing(deltaX, deltaY);
+	
+	updateVelocity(deltaX, deltaY, timeDelta);
+
+	if(abs(deltaX) <= 0 && abs(deltaY) <= 0){
+		return;
+	}
+	if(timeDelta < 50) {
+		deltaX = (int)(deltaX * 1.1f);
+		deltaY = (int)(deltaY * 1.1f);
 	}
 
-    char msg[50];
-    snprintf(msg, sizeof(msg), "%d, %d\r\n", dentaX, dentaY);
-    uartPrint(msg);
+	char msg[50];
+	snprintf(msg, sizeof(msg), "Drag: %d, %d\r\n", deltaX, deltaY);
+	uartPrint(msg);
 
-    //Gui thong tin
-    sendMouse(dentaX, dentaY);
+	//Gui thong tin
+	enqueueMouseEvent(deltaX, deltaY, 0);
 }
 
 void Screen1View::handleClickEvent(const ClickEvent& event)
@@ -105,10 +189,18 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
     currentRadius = 20;
     touch_x = event.getX();
     touch_y = event.getY();
-
     //Xu ly nhan
     if (event.getType() == ClickEvent::PRESSED)
     {
+    	resetTouchState();
+    	
+    	lastDragTime = HAL_GetTick();
+    	isPotentialClick = true;
+    	isDragging = false;
+    	pressStartTime = HAL_GetTick();
+    	press_start_x = touch_x;
+    	press_start_y = touch_y;
+    	
     	myCircle.setPosition(touch_x - currentRadius, touch_y - currentRadius, currentRadius * 2, currentRadius * 2);
     	myCircle.setCenter(currentRadius, currentRadius);
     	myCircle.setRadius(currentRadius);
@@ -119,12 +211,35 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
     	startTime = HAL_GetTick();
 
     	char msg[50];
-    	snprintf(msg, sizeof(msg), "Pressed at: x=%d, y=%d\r\n", touch_x, touch_y);
+    	snprintf(msg, sizeof(msg), "Touch started at: x=%d, y=%d\r\n", touch_x, touch_y);
     	uartPrint(msg);
-    }
-
-    //Xu ly tha
-    else if(event.getType() == ClickEvent::RELEASED){
+    }    
+    else if(event.getType() == ClickEvent::RELEASED)
+    {
+        uint32_t pressDuration = HAL_GetTick() - pressStartTime;
+        int totalMovement = abs(touch_x - press_start_x) + abs(touch_y - press_start_y);
+        if(isPotentialClick && !isDragging && 
+           pressDuration <= CLICK_MAX_DURATION && 
+           totalMovement < DRAG_THRESHOLD)        {
+            char msg[50];
+            snprintf(msg, sizeof(msg), "Click detected: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
+            uartPrint(msg);
+            
+            enqueueMouseEvent(0, 0, 1);
+            enqueueMouseEvent(0, 0, 2);
+        }        else if(isDragging)
+        {
+            char msg[50];
+            snprintf(msg, sizeof(msg), "Drag ended: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
+            uartPrint(msg);
+        }
+        else
+        {
+            char msg[50];
+            snprintf(msg, sizeof(msg), "Gesture cancelled: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
+            uartPrint(msg);
+        }
+        resetTouchState();
 
         // Đặt circle tại vị trí touch
         myCircle.setPosition(touch_x - currentRadius, touch_y - currentRadius, currentRadius * 2, currentRadius * 2);
@@ -134,12 +249,7 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
 
         isScaling = true;
         startTime = HAL_GetTick();
-
-        char msg[50];
-        snprintf(msg, sizeof(msg), "Released at: x=%d, y=%d\r\n", touch_x, touch_y);
-        uartPrint(msg);
     }
-
 }
 
 void Screen1View::handleTickEvent()
@@ -160,9 +270,8 @@ void Screen1View::handleTickEvent()
     		int lastTime = HAL_GetTick() - startTime;
     		myCircle.setVisible(false);
     		myCircle.invalidate();
-
-    		char msg1[50];
-    		snprintf(msg1, sizeof(msg1), "lastTime = %d\n", lastTime);
+            char msg1[50];
+    		snprintf(msg1, sizeof(msg1), "lastTime = %lu\n", lastTime);
     		uartPrint(msg1);
     	}
     }
