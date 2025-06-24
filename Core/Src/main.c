@@ -711,8 +711,8 @@ void mouseProcessingTask(void *pvParameters)
     MouseEvent event;
     static float accumulated_x = 0.0f;
     static float accumulated_y = 0.0f;
-    float scale_x = 2.0f;
-    float scale_y = 2.0f;
+    float scale_x = 4.0f;
+    float scale_y = 4.0f;
     
     while(1) {
         if(osMessageQueueGet(mouseEventQueueHandle, &event, NULL, osWaitForever) == osOK) {
@@ -774,7 +774,6 @@ bool enqueueMouseEvent(int8_t deltaX, int8_t deltaY, uint8_t eventType)
     MouseEvent event;
     event.deltaX = deltaX;
     event.deltaY = deltaY;
-    event.timestamp = HAL_GetTick();
     event.eventType = eventType;
     
     return osMessageQueuePut(mouseEventQueueHandle, &event, 0, 0) == osOK;

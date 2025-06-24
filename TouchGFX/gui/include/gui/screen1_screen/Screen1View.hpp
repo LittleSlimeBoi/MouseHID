@@ -35,7 +35,7 @@ protected:
     float velocity_x = 0.0f;
     float velocity_y = 0.0f;
     static constexpr float ACCELERATION_FACTOR = 1.2f;
-    static constexpr float DAMPING_FACTOR = 0.95f;
+    static constexpr float DAMPING_FACTOR = 0.7f;
     static constexpr float MIN_VELOCITY_THRESHOLD = 0.1f;
 
     bool isPotentialClick = false;

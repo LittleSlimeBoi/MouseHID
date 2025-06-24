@@ -3,17 +3,17 @@
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:61:34:virtual touchgfx::HAL::RenderingMethod touchgfx::AbstractPainter::getRenderingMethod() const	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:78:18:virtual bool touchgfx::AbstractPainter::setup(const touchgfx::Rect&) const	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:90:18:virtual void touchgfx::AbstractPainter::tearDown() const	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:59:6:virtual void Screen1View::tearDownScreen()	3
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:71:6:virtual void Screen1View::tearDownScreen()	3
 ../../TouchGFX/gui/include/gui/screen1_screen/Screen1View.hpp:13:13:Screen1View::~Screen1View()	1
 ../../TouchGFX/gui/include/gui/screen1_screen/Screen1View.hpp:13:13:virtual Screen1View::~Screen1View()	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:233:10:void touchgfx::Drawable::setPosition(int16_t, int16_t, int16_t, int16_t)	1
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainterRGB565.hpp:41:5:touchgfx::AbstractPainterRGB565::AbstractPainterRGB565()	4
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:18:1:Screen1View::Screen1View()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:54:6:void uartPrint(const char*)	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:257:6:virtual void Screen1View::handleTickEvent()	3
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:74:6:void Screen1View::applySmoothing(int&, int&)	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:90:6:void Screen1View::resetTouchState()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:106:6:void Screen1View::updateVelocity(int, int, uint32_t)	14
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:36:6:virtual void Screen1View::setupScreen()	1
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:135:6:virtual void Screen1View::handleDragEvent(const touchgfx::DragEvent&)	8
-C:/TouchGFXProjects/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:187:6:virtual void Screen1View::handleClickEvent(const touchgfx::ClickEvent&)	8
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:30:1:Screen1View::Screen1View()	1
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:66:6:void uartPrint(const char*)	1
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:278:6:virtual void Screen1View::handleTickEvent()	3
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:86:6:void Screen1View::applySmoothing(int&, int&)	1
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:102:6:void Screen1View::resetTouchState()	1
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:119:6:void Screen1View::updateVelocity(int, int, uint32_t)	14
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:48:6:virtual void Screen1View::setupScreen()	1
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:148:6:virtual void Screen1View::handleDragEvent(const touchgfx::DragEvent&)	8
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/TouchGFX/gui/src/screen1_screen/Screen1View.cpp:211:6:virtual void Screen1View::handleClickEvent(const touchgfx::ClickEvent&)	8

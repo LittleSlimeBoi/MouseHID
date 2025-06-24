@@ -1,5 +1,5 @@
 Application/User/USB_DEVICE/App/usbd_desc.o: \
- C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usbd_desc.c \
+ C:/Users/HUY/Downloads/testMouselastHID/MouseHID/USB_DEVICE/App/usbd_desc.c \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../../USB_DEVICE/Target/usbd_conf.h ../../Core/Inc/main.h \
  ../../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
@@ -57,7 +57,7 @@ Application/User/USB_DEVICE/App/usbd_desc.o: \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
- C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usbd_desc.h \
+ C:/Users/HUY/Downloads/testMouselastHID/MouseHID/USB_DEVICE/App/usbd_desc.h \
  ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 ../../USB_DEVICE/Target/usbd_conf.h:
@@ -117,5 +117,5 @@ Application/User/USB_DEVICE/App/usbd_desc.o: \
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
-C:/TouchGFXProjects/MouseHID/USB_DEVICE/App/usbd_desc.h:
+C:/Users/HUY/Downloads/testMouselastHID/MouseHID/USB_DEVICE/App/usbd_desc.h:
 ../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:

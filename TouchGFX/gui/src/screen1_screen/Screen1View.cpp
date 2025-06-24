@@ -15,6 +15,18 @@ extern UART_HandleTypeDef huart1;
 extern osMessageQueueId_t mouseEventQueueHandle;
 extern osThreadId_t mouseTaskHandle;
 
+//bool enqueueMouseEvent(int8_t deltaX, int8_t deltaY, uint8_t eventType)
+//{
+//    if(mouseEventQueueHandle == NULL) return false;
+//
+//    MouseEvent event;
+//    event.deltaX = deltaX;
+//    event.deltaY = deltaY;
+//    event.eventType = eventType;
+//
+//    return osMessageQueuePut(mouseEventQueueHandle, &event, 0, 0) == osOK;
+//}
+
 Screen1View::Screen1View()
 {
     for(int i = 0; i < SMOOTHING_BUFFER_SIZE; i++) {
@@ -88,7 +100,8 @@ void Screen1View::applySmoothing(int& deltaX, int& deltaY)
 }
 
 void Screen1View::resetTouchState()
-{    isPotentialClick = false;
+{
+	isPotentialClick = false;
     isDragging = false;
     velocity_x = 0.0f;
     velocity_y = 0.0f;
@@ -141,7 +154,17 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	
 	uint32_t currentTime = HAL_GetTick();
 	uint32_t timeDelta = currentTime - lastDragTime;
-	lastDragTime = currentTime;	if(isPotentialClick && !isDragging) {
+	lastDragTime = currentTime;
+
+	//Hien thi hinh tron luc ve
+	myCircle.setPosition(evt.getNewX() - currentRadius, evt.getNewY() - currentRadius, currentRadius * 2, currentRadius * 2);
+	myCircle.setCenter(currentRadius, currentRadius);
+	myCircle.setRadius(currentRadius);
+	myCircle.setVisible(true);
+	invalidate();
+
+	//
+	if(isPotentialClick && !isDragging) {
 		uint32_t timeSincePress = currentTime - pressStartTime;
 		int totalMovement = abs(evt.getNewX() - press_start_x) + abs(evt.getNewY() - press_start_y);
 		
@@ -168,6 +191,7 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	if(abs(deltaX) <= 0 && abs(deltaY) <= 0){
 		return;
 	}
+
 	float velocity_factor = 1.0f;
 	if(abs(velocity_x) > 50.0f || abs(velocity_y) > 50.0f) {
 		velocity_factor = 1.5f;
@@ -219,11 +243,10 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
     {
         uint32_t pressDuration = HAL_GetTick() - pressStartTime;
         int totalMovement = abs(touch_x - press_start_x) + abs(touch_y - press_start_y);
-        if(isPotentialClick && !isDragging && 
-           pressDuration <= CLICK_MAX_DURATION && 
-           totalMovement < DRAG_THRESHOLD)        {
+        if(isPotentialClick && !isDragging && pressDuration <= CLICK_MAX_DURATION &&
+           totalMovement < DRAG_THRESHOLD){
+
             char msg[50];
-            snprintf(msg, sizeof(msg), "Click detected: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
             uartPrint(msg);
             
             enqueueMouseEvent(0, 0, 1);
@@ -232,13 +255,11 @@ void Screen1View::handleClickEvent(const ClickEvent& event)
         else if(isDragging)
         {
             char msg[50];
-            snprintf(msg, sizeof(msg), "Drag ended: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
             uartPrint(msg);
         }
         else
         {
             char msg[50];
-            snprintf(msg, sizeof(msg), "Gesture cancelled: duration=%lums, movement=%dpx\r\n", pressDuration, totalMovement);
             uartPrint(msg);
         }
         resetTouchState();
@@ -265,7 +286,7 @@ void Screen1View::handleTickEvent()
     	if(dentaTick <= 1000){
     		int newRadius = currentRadius - currentRadius * dentaTick / 1000;
     		myCircle.setRadius(newRadius);
-    		myCircle.invalidate();
+    		invalidate();
     	}
     	else{
     		isScaling = false;

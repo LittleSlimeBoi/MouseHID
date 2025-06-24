@@ -41,7 +41,6 @@ extern "C" {
 typedef struct {
     int8_t deltaX;
     int8_t deltaY;
-    uint32_t timestamp;
     uint8_t eventType; // 0: drag, 1: nhan, 2: tha
 } MouseEvent;
 
