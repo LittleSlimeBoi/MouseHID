@@ -157,11 +157,14 @@ void Screen1View::handleDragEvent(const DragEvent& evt)
 	lastDragTime = currentTime;
 
 	//Hien thi hinh tron luc ve
+	myCircle.setVisible(false);
+	myCircle.invalidate();
+
 	myCircle.setPosition(evt.getNewX() - currentRadius, evt.getNewY() - currentRadius, currentRadius * 2, currentRadius * 2);
 	myCircle.setCenter(currentRadius, currentRadius);
 	myCircle.setRadius(currentRadius);
 	myCircle.setVisible(true);
-	invalidate();
+	myCircle.invalidate();
 
 	//
 	if(isPotentialClick && !isDragging) {
